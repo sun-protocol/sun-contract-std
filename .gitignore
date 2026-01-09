@@ -17,3 +17,5 @@ states/
 pnpm-lock.yaml
 node_modules/
 lib/
+cache/
+typechain-types/
