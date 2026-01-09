@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract SSPSafeVault is Ownable {
-    IERC20 public rewardToken;
+    IERC20 public assetToken;
     mapping(address => bool) public minters;
     using SafeERC20 for IERC20;
 
@@ -21,30 +21,37 @@ contract SSPSafeVault is Ownable {
         _;
     }
 
-    constructor(address _rewardToken) Ownable(msg.sender) public{
-        rewardToken = IERC20(_rewardToken);
+    constructor(address initAsset) Ownable(msg.sender){
+        assetToken = IERC20(initAsset);
     }
-    // only owner can set minter
-    function setMinter(address _minter, bool isMinter) external onlyOwner {
-        minters[_minter] = isMinter;
+
+    function setMinter(address minter, bool isMinter) external onlyOwner {
+        minters[minter] = isMinter;
     }
-    //onlyMinter can request minting
+
     function mint(uint256 tokenAmount) external onlyMinter {
         require(tokenAmount > 0, "mint: tokenAmount must be greater than 0");
-        rewardToken.safeTransfer(msg.sender, tokenAmount);
+        assetToken.safeTransfer(msg.sender, tokenAmount);
         emit Requested(msg.sender, tokenAmount);
     }
-    // Added to support recovering TRX sent to the contract by mistake
-    function recoverTRX(address payable to_, uint256 amount_) external onlyOwner
-    {
-        require(to_ != address(0), "must not 0");
-        require(amount_ > 0, "must gt 0");
 
-        to_.transfer(amount_);
-        emit Recovered(address(0), amount_);
+    function mintTo(address to, uint256 tokenAmount) external onlyMinter {
+        require(tokenAmount > 0, "mintTo: tokenAmount must be greater than 0");
+        require(to != address(0), "mintTo: to address must not be zero");
+        assetToken.safeTransfer(to, tokenAmount);
+        emit Requested(to, tokenAmount);
     }
 
-    // Added to support recovering LP Rewards from other systems such as BAL to be distributed to holders
+    function recoverTRX(address payable to, uint256 amount) external onlyOwner
+    {
+        require(to != address(0), "to address must not be zero");
+        require(amount > 0, "amount must be greater than 0");
+
+        (bool success,) = to.call{value:amount}("");
+        require(success, 'trx transfer failed');
+        emit Recovered(address(0), amount);
+    }
+
     function recoverTRC20(address tokenAddress, uint256 tokenAmount) external onlyOwner {
         IERC20(tokenAddress).safeTransfer(owner(), tokenAmount);
         emit Recovered(tokenAddress, tokenAmount);
