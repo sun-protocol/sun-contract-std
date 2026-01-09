@@ -29,13 +29,11 @@ contract SSPSafeVault is Ownable {
         minters[minter] = isMinter;
     }
 
-    function mint(uint256 tokenAmount) external onlyMinter {
-        require(tokenAmount > 0, "mint: tokenAmount must be greater than 0");
-        assetToken.safeTransfer(msg.sender, tokenAmount);
-        emit Requested(msg.sender, tokenAmount);
+    function mint(uint256 tokenAmount) external  {
+        mintTo(msg.sender, tokenAmount); 
     }
 
-    function mintTo(address to, uint256 tokenAmount) external onlyMinter {
+    function mintTo(address to, uint256 tokenAmount) public onlyMinter {
         require(tokenAmount > 0, "mintTo: tokenAmount must be greater than 0");
         require(to != address(0), "mintTo: to address must not be zero");
         assetToken.safeTransfer(to, tokenAmount);

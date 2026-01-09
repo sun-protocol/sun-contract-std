@@ -9,10 +9,6 @@ library SafeTransferLib {
     address constant USDTNileAddr = 0xECa9bC828A3005B9a3b909f2cc5c2a54794DE05F;
     address constant USDTMainAddr = 0xa614f803B6FD780986A42c78Ec9c7f77e6DeD13C;
 
-    function getChainId() internal view returns (uint256) {
-        return block.chainid;
-    }
-
     function safeApprove(address token, address to, uint value) internal returns (bool){
         // bytes4(keccak256(bytes('approve(address,uint256)')));
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
@@ -20,22 +16,18 @@ library SafeTransferLib {
     }
 
     function safeTransfer(address token, address to, uint value) internal returns (bool){
-        // bytes4(keccak256(bytes('transfer(address,uint256)')));
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0xa9059cbb, to, value));
 
-        if ((getChainId() == MAIN_CHAIN_ID) && (token == USDTMainAddr)) {
+        if ((token == USDTMainAddr) && (block.chainid == MAIN_CHAIN_ID)) {
+            return success;
+        } else if ((token == USDTNileAddr) && (block.chainid == NILE_CHAIN_ID)) {
             return success;
         }
-
-        if ((getChainId() == NILE_CHAIN_ID) && (token == USDTNileAddr)) {
-            return success;
-        }
-
+ 
         return (success && (data.length == 0 || abi.decode(data, (bool))));
     }
 
     function safeTransferFrom(address token, address from, address to, uint value) internal returns (bool){
-        // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
         return (success && (data.length == 0 || abi.decode(data, (bool))));
     }
