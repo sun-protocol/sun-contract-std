@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity >=0.6.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -8,38 +8,33 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract SSPSafeVault is Ownable {
-    using SafeMath for uint256;
+    IERC20 public rewardToken;
+    mapping(address => bool) public minters;
     using SafeERC20 for IERC20;
-    // mainnet: TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S  0xb4A428ab7092c2f1395f376cE297033B3bB446C1
-    // nile : TDqjTkZ63yHB19w2n7vPm2qAkLHwn9fKKk  0x2A769a33b6ed01a074e4a45bfFa0778A27949BEc
-    IERC20 public constant sspToken = IERC20(0xb4A428ab7092c2f1395f376cE297033B3bB446C1);
-    address public sspStaker;
 
     event Recovered(address token, uint256 amount);
 
-    event SSPRequested(address requester, uint256 amount);
+    event Requested(address requester, uint256 amount);
 
-
-    modifier onlyStaker() {
-        require(msg.sender == sspStaker, "onlyStaker: caller is not the sspStaker");
+    modifier onlyMinter() {
+        require(minters[msg.sender] == true, "onlyMinter: caller is not the minter");
         _;
     }
 
-    constructor() Ownable() public{
+    constructor(address _rewardToken) Ownable(msg.sender) public{
+        rewardToken = IERC20(_rewardToken);
     }
-
-    function _init(address _sspStaker) external {
-        require(sspStaker == address(0), "only init once");
-
-        sspStaker = _sspStaker;
+    // only owner can set minter
+    function setMinter(address _minter, bool isMinter) external onlyOwner {
+        minters[_minter] = isMinter;
     }
-
-
-    function request(uint256 tokenAmount) external onlyStaker {
-        sspToken.safeTransfer(msg.sender, tokenAmount);
-        emit SSPRequested(msg.sender, tokenAmount);
+    //onlyMinter can request minting
+    function mint(uint256 tokenAmount) external onlyMinter {
+        require(tokenAmount > 0, "mint: tokenAmount must be greater than 0");
+        rewardToken.safeTransfer(msg.sender, tokenAmount);
+        emit Requested(msg.sender, tokenAmount);
     }
-
+    // Added to support recovering TRX sent to the contract by mistake
     function recoverTRX(address payable to_, uint256 amount_) external onlyOwner
     {
         require(to_ != address(0), "must not 0");
@@ -54,8 +49,6 @@ contract SSPSafeVault is Ownable {
         IERC20(tokenAddress).safeTransfer(owner(), tokenAmount);
         emit Recovered(tokenAddress, tokenAmount);
     }
-
-
 }
 
 
