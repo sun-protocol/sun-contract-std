@@ -2,7 +2,7 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 import "forge-std/Test.sol";
-import "../contracts/utils/SafeTransferLib.sol";
+import "../contracts/libraries/SafeTransferLib.sol";
 import "./TokenSender.sol";
 
 import "./mocks/MockERC20Standard.sol";
