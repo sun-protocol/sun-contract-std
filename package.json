@@ -18,8 +18,9 @@
     "test-foundry": "forge test -vvv",
     "compile-tron": "hardhat compile --network tron --verbose --force",
     "deploy": "npx hardhat --network localhost deploy",
-    "deploy-sepolia": "npx hardhat --network sepolia deploy",
-    "deploy-tron": "npx hardhat --network tron deploy --tags lumi"
+    "deploy-tron": "npx hardhat --network tron deploy",
+    "deploy-nile": "npx hardhat --network nile deploy",
+    "deploy-shasta": "npx hardhat --network shasta deploy"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
