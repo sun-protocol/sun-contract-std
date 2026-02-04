@@ -1,18 +1,18 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
+import * as dotenv from 'dotenv'
+dotenv.config()
 
-import { HardhatUserConfig } from '@sun-protocol/sunhat';
-import '@nomicfoundation/hardhat-toolbox';
-import '@nomiclabs/hardhat-vyper';
-import '@sun-protocol/sunhat';
-import '@nomicfoundation/hardhat-foundry';
+import { HardhatUserConfig } from '@sun-protocol/sunhat'
+import '@nomicfoundation/hardhat-toolbox'
+import '@nomiclabs/hardhat-vyper'
+import '@sun-protocol/sunhat'
+import '@nomicfoundation/hardhat-foundry'
 
 const settings = {
   optimizer: {
     enabled: true, // enabled for optimizer
     runs: 999999, // runs time for optimizer run
   },
-};
+}
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -37,7 +37,19 @@ const config: HardhatUserConfig = {
       // accounts: [`1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef`],
     },
     tron: {
+      url: 'https://api.trongrid.io/jsonrpc', // tron mainnet rpc url
+      tron: true, // enable tron network
+      deploy: ['deployTron/'], // folder for tron deploy scripts
+      accounts: [`${process.env.PRIVATE_KEY}`], // account private key for deploy
+    },
+    nile: {
       url: 'https://nile.trongrid.io/jsonrpc', // tron mainnet rpc url
+      tron: true, // enable tron network
+      deploy: ['deployTron/'], // folder for tron deploy scripts
+      accounts: [`${process.env.PRIVATE_KEY}`], // account private key for deploy
+    },
+    shasta: {
+      url: 'https://api.shasta.trongrid.io/jsonrpc', // tron mainnet rpc url
       tron: true, // enable tron network
       deploy: ['deployTron/'], // folder for tron deploy scripts
       accounts: [`${process.env.PRIVATE_KEY}`], // account private key for deploy
@@ -57,6 +69,6 @@ const config: HardhatUserConfig = {
       default: 0, // here this will by default take the first account as deployer
     },
   },
-};
+}
 
-export default config;
+export default config
